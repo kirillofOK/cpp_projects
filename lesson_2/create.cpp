@@ -19,4 +19,36 @@ void create_nodes(std::ofstream &output, double start, double end, int n, std::s
             output << x_i << " " << exp(x_i) << std::endl;
         }
     }
+    else if ((func == "runge") && (nodes == "uniform"))
+    {
+        for (int i = 0; i < n; ++i)
+        {
+            x_i = start + (end - start) * i / n;
+            output << x_i << " " << runge(x_i) << std::endl;
+        }
+    }
+    else if ((func == "runge") && (nodes == "cheb"))
+    {
+        for (int i = 0; i < n; ++i)
+        {
+            x_i = (start + end) / 2 + (end - start) * std::cos((2 * i + 1) * M_PI / (2 * n + 2)) / 2;
+            output << x_i << " " << runge(x_i) << std::endl;
+        }
+    }
+    else if ((func == "abs") && (nodes == "uniform"))
+    {
+        for (int i = 0; i < n; ++i)
+        {
+            x_i = start + (end - start) * i / n;
+            output << x_i << " " << abs(x_i) << std::endl;
+        }
+    }
+    else if ((func == "abs") && (nodes == "cheb"))
+    {
+        for (int i = 0; i < n; ++i)
+        {
+            x_i = (start + end) / 2 + (end - start) * std::cos((2 * i + 1) * M_PI / (2 * n + 2)) / 2;
+            output << x_i << " " << abs(x_i) << std::endl;
+        }
+    }
 }

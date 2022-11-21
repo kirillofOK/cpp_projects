@@ -10,7 +10,6 @@ int main(int argc, char *argv[])
     std::ofstream output;
     std::ifstream input;
 
-
     if (argc != 6)
     {
         std::perror("[incorrect input");
@@ -32,11 +31,11 @@ int main(int argc, char *argv[])
     output.open("output.txt");
     create_nodes(output, start, end, n, nodes, func);
     output.close();
-    
-    double* char = new char[n];
-    double* A = new double[n*n];
-    double* b = new double[n];
-    double* x = new double[n];
+
+    char *tmp = new char[n];
+    double *A = new double[n * n];
+    double *b = new double[n];
+    double *x = new double[n];
 
     input.open("output.txt");
     if (!input.is_open())
@@ -44,9 +43,11 @@ int main(int argc, char *argv[])
         std::perror("Can't read file!");
     }
 
-    create_matrix(A, b, n)
+    create_matrix(input, A, n);
+    matrix_outputing(A, n);
 
-    delete[] buffer;
+    input.close();
+    delete[] tmp;
     delete[] A;
     delete[] b;
     delete[] x;
