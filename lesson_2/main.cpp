@@ -6,7 +6,10 @@ int main(int argc, char *argv[])
     double start, end;
     int n;
     std::string nodes, func;
+
     std::ofstream output;
+    std::ifstream input;
+
 
     if (argc != 6)
     {
@@ -29,4 +32,20 @@ int main(int argc, char *argv[])
     output.open("output.txt");
     create_nodes(output, start, end, n, nodes, func);
     output.close();
+    
+    double* char = new char[n];
+    double* A = new double[n*n];
+    double* b = new double[n];
+    double* x = new double[n];
+
+    input.open("output.txt");
+    if (!input.is_open()){
+        std::perror("Can't read file!");
+    }
+
+
+    delete[] buffer;
+    delete[] A;
+    delete[] b;
+    delete[] x;
 }
