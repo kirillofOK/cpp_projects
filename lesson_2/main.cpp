@@ -39,10 +39,12 @@ int main(int argc, char *argv[])
     double* x = new double[n];
 
     input.open("output.txt");
-    if (!input.is_open()){
+    if (!input.is_open())
+    {
         std::perror("Can't read file!");
     }
 
+    create_matrix(A, b, n)
 
     delete[] buffer;
     delete[] A;
