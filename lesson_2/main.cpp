@@ -43,8 +43,14 @@ int main(int argc, char *argv[])
         std::perror("Can't read file!");
     }
 
+    std::cout.setf(std::ios::scientific);
+    std::cout.setf(std::ios::showpos);
+    std::cout << std::fixed << std::setprecision(10);
+
     create_matrix(input, A, n);
     matrix_outputing(A, n);
+    b_creating(input, b);
+    b_outputting(b, n);
 
     input.close();
     delete[] tmp;
