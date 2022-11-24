@@ -12,3 +12,6 @@ double runge(double x);
 void matrix_outputing(double *A, int n);
 void b_creating(std::ifstream &input, double *b);
 void b_outputting(double *b, int n);
+int gauss(double *A, double *b, int n, double *x);
+void x_outputting(double *b, int n);
+void create_Pn(std::ofstream &P_n, double *x, int n, std::string func);

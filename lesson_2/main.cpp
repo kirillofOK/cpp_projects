@@ -51,6 +51,13 @@ int main(int argc, char *argv[])
     matrix_outputing(A, n);
     b_creating(input, b);
     b_outputting(b, n);
+    gauss(A, b, n, x);
+    x_outputting(x, n);
+
+    std::ofstream P_n;
+    P_n.open("P_n.txt");
+    create_Pn(P_n, x, n, func);
+    P_n.close();
 
     input.close();
     delete[] tmp;
