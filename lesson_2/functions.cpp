@@ -1,10 +1,12 @@
 #include "header.hpp"
 
+// Runge function ...
 double runge(double x)
 {
     return (1 / (1 + 25 * x * x));
 }
 
+// Create matrix ...
 void create_matrix(std::ifstream &input, double *A, int n)
 {
     char *str = new char;
@@ -21,6 +23,7 @@ void create_matrix(std::ifstream &input, double *A, int n)
     input.seekg(0);
 }
 
+// Output matrix ...
 void matrix_outputing(double *A, int n)
 {
     std::cout << "Matrix A:" << std::endl;
@@ -36,6 +39,7 @@ void matrix_outputing(double *A, int n)
               << std::endl;
 }
 
+// Create b vector ...
 void b_creating(std::ifstream &input, double *b)
 {
     std::string str;
@@ -51,6 +55,7 @@ void b_creating(std::ifstream &input, double *b)
     }
 }
 
+// Output b vector ...
 void b_outputting(double *b, int n)
 {
     std::cout << "b vector:" << std::endl;
@@ -60,6 +65,7 @@ void b_outputting(double *b, int n)
     }
 }
 
+// Gauss choose main element in column ...
 int gauss(double *A, double *b, int n, double *x)
 {
     double max;
@@ -142,6 +148,7 @@ int gauss(double *A, double *b, int n, double *x)
     return 1;
 }
 
+// Outputting cooficients of P_n - solution from Gauss ...
 void x_outputting(double *b, int n)
 {
     std::cout << "x vector:" << std::endl;
@@ -151,6 +158,7 @@ void x_outputting(double *b, int n)
     }
 }
 
+// Create P_n command file for gnuplot
 void create_Pn(std::ofstream &P_n, double *x, int n, std::string func)
 {
     P_n << "set yrange[-15:15]" << std::endl;
