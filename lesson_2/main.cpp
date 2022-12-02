@@ -48,11 +48,11 @@ int main(int argc, char *argv[])
     std::cout << std::fixed << std::setprecision(10);
 
     create_matrix(input, A, n);
-    matrix_outputing(A, n);
+    // matrix_outputing(A, n);
     b_creating(input, b);
-    b_outputting(b, n);
+    // b_outputting(b, n);
     gauss(A, b, n, x);
-    x_outputting(x, n);
+    // x_outputting(x, n);
 
     std::ofstream P_n;
     P_n.open("P_n.txt");

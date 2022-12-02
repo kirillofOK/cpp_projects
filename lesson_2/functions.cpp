@@ -217,10 +217,10 @@ void create_Ln(std::ifstream &input, std::ofstream &L_n, int n, std::string func
         std::istringstream iss(tmp_string);
         iss >> x[i] >> y[i];
 
-        std::cout << "str_ " << i << "= " << tmp_string << std::endl;
-        std::cout << "x_" << i << "= " << x[i] << std::endl;
-        std::cout << "y_" << i << "= " << y[i] << std::endl
-                  << std::endl;
+        // std::cout << "str_ " << i << "= " << tmp_string << std::endl;
+        // std::cout << "x_" << i << "= " << x[i] << std::endl;
+        // std::cout << "y_" << i << "= " << y[i] << std::endl
+        //           << std::endl;
         ++i;
     }
 
@@ -235,7 +235,7 @@ void create_Ln(std::ifstream &input, std::ofstream &L_n, int n, std::string func
         }
         else
         {
-            L_n << l_i(x, i, n) << "*" << y[i] << std::endl;
+            L_n << l_i(x, i, n) << y[i] << std::endl;
         }
     }
     delete[] x;
@@ -290,7 +290,7 @@ std::string l_i(double *x, int i, int n)
         }
     }
 
-    std::cout << l_i.str() << " STEP " << i << std::endl;
+    // std::cout << l_i.str() << " STEP " << i << std::endl;
 
     return l_i.str();
 }
