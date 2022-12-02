@@ -59,6 +59,14 @@ int main(int argc, char *argv[])
     create_Pn(P_n, x, n, func);
     P_n.close();
 
+    std::ofstream L_n;
+
+    L_n.open("L_n.txt");
+
+    create_Ln(input, L_n, n, func);
+
+    L_n.close();
+
     input.close();
     delete[] tmp;
     delete[] A;

@@ -199,3 +199,98 @@ void create_Pn(std::ofstream &P_n, double *x, int n, std::string func)
             << "f1(x), f2(x)";
     }
 }
+
+void create_Ln(std::ifstream &input, std::ofstream &L_n, int n, std::string func)
+{
+    double *x = new double[n];
+    double *y = new double[n];
+
+    std::string tmp_string;
+
+    input.clear();
+    input.seekg(0);
+    int i = 0;
+
+    while (getline(input, tmp_string))
+    {
+
+        std::istringstream iss(tmp_string);
+        iss >> x[i] >> y[i];
+
+        std::cout << "str_ " << i << "= " << tmp_string << std::endl;
+        std::cout << "x_" << i << "= " << x[i] << std::endl;
+        std::cout << "y_" << i << "= " << y[i] << std::endl
+                  << std::endl;
+        ++i;
+    }
+
+    L_n << "set yrange[-1:4]" << std::endl;
+    L_n << "f1(x) = ";
+
+    for (int i = 0; i < n; ++i)
+    {
+        if (i != n - 1)
+        {
+            L_n << l_i(x, i, n) << "*" << y[i] << "+";
+        }
+        else
+        {
+            L_n << l_i(x, i, n) << "*" << y[i] << std::endl;
+        }
+    }
+    delete[] x;
+    delete[] y;
+    if (func != "runge")
+    {
+        L_n << "f2(x) = " << func << "(x)" << std::endl;
+        L_n << "plot "
+            << "["
+            << "-2"
+            << ":"
+            << "2"
+            << "]"
+            << "f1(x), f2(x)";
+    }
+    else
+    {
+        L_n << "f2(x) = 1/(25 * x**2 + 1)" << std::endl;
+        L_n << "plot "
+            << "["
+            << "-2"
+            << ":"
+            << "2"
+            << "]"
+            << "f1(x), f2(x)";
+    }
+
+    // for (int k = 0; k < n; ++k)
+    // {
+    //     std::cout << x[k] << std::endl;
+    // }
+}
+
+std::string l_i(double *x, int i, int n)
+{
+    std::ostringstream l_i;
+
+    for (int j = 0; j < n; ++j)
+    {
+        if (j != i)
+        {
+            if (j != n - 1)
+            {
+                l_i << "(x - (" << x[j] << "))"
+                    << "/(" << x[i] - x[j] << ") *";
+            }
+            else
+            {
+                l_i << "(x - (" << x[j] << "))"
+                    << "/(" << x[i] - x[j] << ")";
+            }
+        }
+    }
+
+    std::cout << l_i.str() << " STEP " << i << std::endl;
+
+    return l_i.str();
+}

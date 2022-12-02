@@ -15,3 +15,5 @@ void b_outputting(double *b, int n);
 int gauss(double *A, double *b, int n, double *x);
 void x_outputting(double *b, int n);
 void create_Pn(std::ofstream &P_n, double *x, int n, std::string func);
+void create_Ln(std::ifstream &input, std::ofstream &L_n, int n, std::string func);
+std::string l_i(double *x, int i, int n);
