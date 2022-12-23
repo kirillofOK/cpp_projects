@@ -67,6 +67,8 @@ int main(int argc, char *argv[])
 
     L_n.close();
 
+    diff(input, n);
+
     input.close();
     delete[] tmp;
     delete[] A;

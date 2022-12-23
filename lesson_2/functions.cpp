@@ -294,3 +294,56 @@ std::string l_i(double *x, int i, int n)
 
     return l_i.str();
 }
+
+void diff(std::ifstream &input, int n)
+{
+    std::ofstream output;
+    output.open("diff.txt");
+
+    double *x = new double[n];
+    double *y = new double[n];
+
+    std::string tmp_string;
+
+    input.clear();
+    input.seekg(0);
+    int i = 0;
+
+    while (getline(input, tmp_string))
+    {
+
+        std::istringstream iss(tmp_string);
+        iss >> x[i] >> y[i];
+        ++i;
+    }
+
+    input.clear();
+    input.seekg(0);
+
+    double l = 0;
+    for (int k = 0; k < n; ++k)
+    {
+        std::string tmp;
+        double L = 0;
+        for (int i = 0; i < n; ++i)
+        {
+            for (int j = 0; j < n; ++j)
+            {
+                if (j != i)
+                {
+                    l *= (x[k] - x[j]) / (x[i] - x[j]);
+                }
+            }
+            L += l * y[i];
+        }
+        getline(input, tmp);
+        tmp += ("  " + std::to_string(L - y[k]));
+        output << tmp << std::endl;
+
+        // output << tmp << "  AA" << std::endl;
+    }
+
+    output.close();
+    delete[] x;
+    delete[] y;
+}
