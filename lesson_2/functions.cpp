@@ -200,29 +200,9 @@ void create_Pn(std::ofstream &P_n, double *x, int n, std::string func)
     }
 }
 
-void create_Ln(std::ifstream &input, std::ofstream &L_n, int n, std::string func)
+void create_Ln(std::ofstream &L_n, int n,
+               std::string func, double *x, double *y)
 {
-    double *x = new double[n];
-    double *y = new double[n];
-
-    std::string tmp_string;
-
-    input.clear();
-    input.seekg(0);
-    int i = 0;
-
-    while (getline(input, tmp_string))
-    {
-
-        std::istringstream iss(tmp_string);
-        iss >> x[i] >> y[i];
-
-        // std::cout << "str_ " << i << "= " << tmp_string << std::endl;
-        // std::cout << "x_" << i << "= " << x[i] << std::endl;
-        // std::cout << "y_" << i << "= " << y[i] << std::endl
-        //           << std::endl;
-        ++i;
-    }
 
     L_n << "set yrange[-1:4]" << std::endl;
     L_n << "f1(x) = ";
@@ -238,9 +218,7 @@ void create_Ln(std::ifstream &input, std::ofstream &L_n, int n, std::string func
             L_n << l_i(x, i, n) << y[i] << std::endl;
         }
     }
-    delete[] x;
-    delete[] y;
-    if (func != "runge")
+    if ((func != "runge") && func != "x_pow_10")
     {
         L_n << "f2(x) = " << func << "(x)" << std::endl;
         L_n << "plot "
@@ -251,7 +229,7 @@ void create_Ln(std::ifstream &input, std::ofstream &L_n, int n, std::string func
             << "]"
             << "f1(x), f2(x)";
     }
-    else
+    else if (func == "runge")
     {
         L_n << "f2(x) = 1/(25 * x**2 + 1)" << std::endl;
         L_n << "plot "
@@ -262,11 +240,17 @@ void create_Ln(std::ifstream &input, std::ofstream &L_n, int n, std::string func
             << "]"
             << "f1(x), f2(x)";
     }
-
-    // for (int k = 0; k < n; ++k)
-    // {
-    //     std::cout << x[k] << std::endl;
-    // }
+    else if (func == "x_pow_10")
+    {
+        L_n << "f2(x) = x**10" << std::endl;
+        L_n << "plot "
+            << "["
+            << "-2"
+            << ":"
+            << "2"
+            << "]"
+            << "f1(x), f2(x)";
+    }
 }
 
 std::string l_i(double *x, int i, int n)
@@ -290,60 +274,88 @@ std::string l_i(double *x, int i, int n)
         }
     }
 
-    // std::cout << l_i.str() << " STEP " << i << std::endl;
-
     return l_i.str();
 }
 
-void diff(std::ifstream &input, int n)
+void diff(std::ifstream &input, int n, double *x, double *y)
 {
+    input.clear();
+    input.seekg(0);
+
     std::ofstream output;
     output.open("diff.txt");
 
-    double *x = new double[n];
-    double *y = new double[n];
-
-    std::string tmp_string;
-
-    input.clear();
-    input.seekg(0);
-    int i = 0;
-
-    while (getline(input, tmp_string))
-    {
-
-        std::istringstream iss(tmp_string);
-        iss >> x[i] >> y[i];
-        ++i;
-    }
-
-    input.clear();
-    input.seekg(0);
-
-    double l = 0;
     for (int k = 0; k < n; ++k)
     {
         std::string tmp;
-        double L = 0;
-        for (int i = 0; i < n; ++i)
-        {
-            for (int j = 0; j < n; ++j)
-            {
-                if (j != i)
-                {
-                    l *= (x[k] - x[j]) / (x[i] - x[j]);
-                }
-            }
-            L += l * y[i];
-        }
         getline(input, tmp);
-        tmp += ("  " + std::to_string(L - y[k]));
+        // std::cout << L << std::endl;
+        tmp += ("  " + std::to_string(lagr(x, y, x[k], n) - y[k]));
         output << tmp << std::endl;
-
-        // output << tmp << "  AA" << std::endl;
     }
 
     output.close();
-    delete[] x;
-    delete[] y;
+}
+
+double lagr(double *x, double *y, double arg, int n)
+{
+    double L = 0;
+    for (int i = 0; i < n; ++i)
+    {
+        double l = 1;
+        for (int j = 0; j < n; ++j)
+        {
+            if (j != i)
+            {
+                l *= (arg - x[j]) / (x[i] - x[j]);
+            }
+        }
+        L += l * y[i];
+    }
+    return L;
+}
+
+void test_func(double *x, double *y, int n, std::string func)
+{
+    double *test = new double[(n - 1) * 2 + n];
+    double *test_y = new double((n - 1) * 2 + n);
+    double h = 0.;
+    int k = 0;
+    for (int i = 0; i < n - 1; ++i)
+    {
+        h = (x[i + 1] - x[i]) / 3;
+        test[i + k] = x[i];
+        test[i + k + 1] = x[i] + h;
+        test[i + k + 2] = x[i] + 2 * h;
+        k += 2;
+        std::cout << test[i] << std::endl;
+    }
+
+    for (int i = 0; i < (n - 1) * 2 + n; ++i)
+    {
+        if (func == "abs")
+        {
+            test_y[i] = abs(test[i]);
+        }
+        else if (func == "x_pow_10")
+        {
+            test_y[i] = pow(test[i], 10);
+        }
+        else if (func == "runge")
+        {
+            test_y[i] = runge(test[i]);
+        }
+    }
+
+    std::ofstream testFile;
+    testFile.open("test.txt");
+
+    for (int i = 0; i < (n - 1) * 2 + n; ++i)
+    {
+        testFile << test[i] << "   " << test_y[i] << "  " << lagr(x, y, test[i], n) << "   " << test_y[i] - lagr(x, y, test[i], n) << std::endl;
+    }
+
+    testFile.close();
+    delete[] test;
+    delete test_y;
 }

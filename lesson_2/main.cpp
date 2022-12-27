@@ -5,6 +5,7 @@ int main(int argc, char *argv[])
 
     double start, end;
     int n;
+
     std::string nodes, func;
 
     std::ofstream output;
@@ -17,7 +18,6 @@ int main(int argc, char *argv[])
 
     start = atof(argv[1]);
     end = atof(argv[2]);
-    // printf("%f\n", start);
 
     if (start > end)
     {
@@ -28,14 +28,16 @@ int main(int argc, char *argv[])
     nodes = argv[4];
     func = argv[5];
 
-    output.open("output.txt");
-    create_nodes(output, start, end, n, nodes, func);
-    output.close();
+    double *x_i = new double[n];
+    double *y_i = new double[n];
 
-    char *tmp = new char[n];
     double *A = new double[n * n];
     double *b = new double[n];
     double *x = new double[n];
+
+    output.open("output.txt");
+    create_nodes(output, start, end, n, nodes, func, x_i, y_i);
+    output.close();
 
     input.open("output.txt");
     if (!input.is_open())
@@ -45,14 +47,12 @@ int main(int argc, char *argv[])
 
     std::cout.setf(std::ios::scientific);
     std::cout.setf(std::ios::showpos);
-    std::cout << std::fixed << std::setprecision(10);
 
     create_matrix(input, A, n);
-    // matrix_outputing(A, n);
+
     b_creating(input, b);
-    // b_outputting(b, n);
+
     gauss(A, b, n, x);
-    // x_outputting(x, n);
 
     std::ofstream P_n;
     P_n.open("P_n.txt");
@@ -63,15 +63,19 @@ int main(int argc, char *argv[])
 
     L_n.open("L_n.txt");
 
-    create_Ln(input, L_n, n, func);
+    create_Ln(L_n, n, func, x_i, y_i);
 
     L_n.close();
 
-    diff(input, n);
+    diff(input, n, x_i, y_i);
 
     input.close();
-    delete[] tmp;
+
+    test_func(x_i, y_i, n, func);
+
     delete[] A;
     delete[] b;
     delete[] x;
+    delete[] x_i;
+    delete[] y_i;
 }
