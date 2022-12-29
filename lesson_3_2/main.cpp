@@ -1,303 +1,216 @@
-// по человечески перепишем программу. 
-#include <cstdio>
-#include <cmath>
-#include <ctime>
-#include <cstdlib>
-#include <algorithm>
+#include "header.hpp"
+#include <stdio.h>
 #include <iostream>
-#include <fstream> 
-#include <random>
-#include <string>
-#include <iterator>
-//template <class RandomIt>
-#include <iostream>
-#include <algorithm>
-#include <math.h>
+#include <fstream>
+
 using namespace std;
- 
-double testFunc(double x) //есть проблема с интерполяцией вот тут, понятия не
-{    //вот, поменяли значение функции, все заработало как-будто. Попробуем тепер
-    //return pow(x, 2); 
-    //printf("hjeeeel");// та функция которую мы будем интерполировать 
-	//return exp(-fabs(x))*100;
-	// cos(x);
-	//return 1.0 / (1 + 25 * x * x); // для отутствия сходимости функции рунге   //так вот получили мы такую штуку,
-	return abs(x); // четные функции могут интерполировать четную фукнцию, нечетное количество узлов 
-} 
 
-// Вводит матрицу разделенных разностей
-void vvod(double *X, double* Y, double** fi, int N, double dx, double LEFT){
-    for (int i = 0; i < N +1; i++) // и так начнем заполнять наш массив 
+int main()
+{
+
+    int N, n, f_type, grid_chose;
+    double a, b;
+
+    cout << "\tЗадаём N+1 точку 0...N: N = \n";
+    cin >> N;
+
+    cout << "\tСтепень многочлена P: n = \n";
+    cin >> n;
+
+    cout << "\tСетка:\n";
+    cout << "1.Равномерная\n2.Чебышёвская\n";
+    cin >> grid_chose;
+
+    cout << "\tНомер функции:\n";
+    cout << "1.Рунге f(x) = 1 / (1 + 25x^2)\n2.Модуль f(x) = |x|\n3.Квадрат f(x) = x^2\n4.Экспонента f(x) = exp(x)\n";
+    cin >> f_type;
+
+    cout << "\tОтрезок [a, b]:\n";
+    cout << "a = ";
+    cin >> a;
+
+    cout << "b = ";
+    cin >> b;
+
+    // Задаём точки x согласно сетки:
+    double *x = new double[N + 1];
+    if (input_x(x, N + 1, grid_chose, a, b) != SUCCES)
     {
-        printf("%d\n", i); 
-        printf("%lf\n", LEFT + i*dx); 
-        fi[i] = new double [N+1];
-        X[i] = LEFT + i*dx; 
-        Y[i] = testFunc(X[i]);
-        fi[i][0] = pow(-1, i);//мы первый столбец матрицы разделенной разности заполняем как-бы значениями функции по идее да.  
-    } // i у нас от 0 до N; 
 
-    printf("X[i]                Y[i]                  fi is\n");
-    printf("//////////////////////////////////////////////////////////////\n");
-    for (int i = 0; i < N+1; i++){
-        printf("%lf",X[i]);
-        printf("                         %lf,                  %lf\n",Y[i], fi[i][0]);
-    } //ввод работает правильно, всего ввели 11 точек при заданнных 10, хорошо
-}
-
-void vvod_basis(double *X, double** Y_basis, double* X_basis, int n, int dx_basis){
-    for (int i =0; i < n; ++i){
-        Y_basis[i] = new double [n];
-        X_basis[i] = X[i*dx_basis];
-        Y_basis[i][0] = testFunc(X_basis[i]);
+        cout << "Ошибка при заполнении массива точек x\n";
+        delete[] x;
+        return ERROR;
     }
-        printf("X[i]_basis                Y[i]_basis is\n");
-        printf("//////////////////////////////////////////////////////////////\n");
-    for (int i = 0; i < n; i++){
-        printf("%lf",X_basis[i]);
-        printf("                         %lf\n",Y_basis[i][0]      );
-    }  
-}
 
+    // задаём y = f(x)
+    double *y = new double[N + 1];
+    if (f(x, y, N + 1, f_type) != SUCCES)
+    {
 
-
-void divided_diff_table(double* X_basis, double** Y_basis, double** fi, int n){
-
-    for (int i = 1; i < n; i++) {
-        for (int j = 0; j < n - i; j++) {
-            Y_basis[j][i] = (Y_basis[j][i - 1] - Y_basis[j + 1][i - 1]) / (X_basis[j] - X_basis[i + j]);
-            fi[j][i] = (fi[j][i-1] - fi[j+1][i - 1])/ (X_basis[j] - X_basis[i+j]); 
-        }
+        cout << "Ошибка при заполнении массива y = f(x)\n";
+        delete[] x;
+        delete[] y;
+        return ERROR;
     }
-     /*for (int i = 0; i < n; i++) {
-        printf("interation number is %d\n", i);
-        printf("//////////////////////////////////////////////////\n");
-        for (int j = 0; j < n - i; j++) {
-            printf("%lf\n", Y_basis[j][i]);
-        }
-        cout << "\n";
-     }
 
+    // cout << "x\n" ;
+    // matrix_print(x, 1, N+1);
 
-     for (int i = 0; i < n; i++) {
-        printf("interation number is %d\n", i);
-        printf("//////////////////////////////////////////////////\n");
-        for (int j = 0; j < n - i; j++) {
-            printf("%lf\n", fi[j][i]);
-        }
-        cout << "\n";
-     }*/
+    // cout << "y\n";
+    // matrix_print(y, 1, N+1);
 
-    printf("Last diff difference matrix element is %lf\n", Y_basis[0][n-1]);
-    printf("Last diff difference element for -1 is %lf\n", fi[0][n-1]);
+    // будем хранить массив разделённых разностей: для f -> f_d; для phi -> phi_d
+    double *f_d = new double[n + 1];
+    double *phi_d = new double[n + 1];
 
-    printf("////////////////////////////////////-///////////////////////////////////////////////////////\n");
-}
+    // изначальные точки в базисе
+    double *x_basis = new double[n + 2];
+    double *y_basis = new double[n + 2];
 
+    int *basis_idx = new int[n + 2];
 
+    // Выбираем исходый базис
+    input_x_y_basis(basis_idx, x_basis, y_basis, x, y, n, N);
 
-double multipl(double target, double* X, int k){
-    double sum = 1;
-    for(int i = 0; i < k; i++){
-        sum *= (target - X[i]); 
-        //printf("on %d interation of aghorim ", i); 
-       //printf("sum is %lf\n", sum);
-    }
-//далее нужно расчитать ошибку значит 
+    for (int counter = 0; counter < 250; ++counter)
+    {
 
-    return sum;
-}
+        cout << "\n~~~~~~~~Итерация номер " << counter << "~~~~~~~~\n";
 
-double  algo(double* X_basis,double** Y_basis, double** fi, int n, double X_target){
-    double h = 0;
-    h = Y_basis[0][n-1]/fi[0][n-1];
-    double sum = 0; 
-    double target = X_target;
-    for (int m = 0; m < n; m++){ // цикл, зачем он нам тут нужен 
-    double X_target = X_basis[m]; 
-    for(int k = 1; k < n-1; k++ )
-        sum += (Y_basis[0][k] - h*fi[0][k]) * multipl(X_target, X_basis, k);
-   // printf("Polinomial interpol is %lf\n", Y_basis[0][0] - h + sum);
-        if (abs(pow(-1, m)*h + Y_basis[0][0] - h + sum - Y_basis[m][0]) > 1e-10){
-            printf("SMTHING IS WRONG");
-            return -1;
-        }
-    //printf("Real function is %lf\n", Y_basis[m][0]); // 
-        sum = 0; //так, все норм 
-    }
-    for(int k = 1; k < n-1; k++ )
-        sum += (Y_basis[0][k] - h*fi[0][k]) * multipl(target, X_basis, k);
-    return  Y_basis[0][0] - h + sum ; 
+        cout << "\nbasis_idx\n";
+        matrix_print(basis_idx, 1, n + 2);
 
-}
+        cout << "x_basis\n";
+        matrix_print(x_basis, 1, n + 2);
 
-int sign(double x){
-    if (x > 0)
-        return 0; 
-    else 
-        return 1; 
-}
+        cout << "y_basis\n";
+        matrix_print(y_basis, 1, n + 2);
 
+        find_divided_differences(0, f_d, x_basis, y_basis, n);   // -> разделённая разность для y, т е f(x_0; x_1; ... x_{x+1})
+        find_divided_differences(1, phi_d, x_basis, y_basis, n); // -> разделённая разность для phi(x_0; x_1; ... x_{x+1})
 
+        cout << "\nРазделённые разности f_d:\n";
+        matrix_print(f_d, 1, n + 1);
 
+        cout << "\nРазделённые разности phi_d:\n";
+        matrix_print(phi_d, 1, n + 1);
 
-int main(){ //написать проги все сам, давай сел и написал и надо дискру 
-    int N; 
-    int n; 
-    const double LEFT = -1.0; 
-    const double RIGHT  = 2.0;
-    scanf("%d", &N); 
-    scanf("%d", &n);
-    double* X = new double [N+1]; 
-    double** Y_basis = new double* [N+1];
-    double* Y = new double [N+1]; 
-    double** fi = new double* [N+1];
-    double*X_basis = new double[n+2]; 
-    //надомравномерно задать сетку 
-    const double dx = (RIGHT - LEFT) / (N);
-    const int dx_basis = (N+1)/(n+2);
-    //double target = 0; 
-    printf("dx_basis = %lf\n", dx); //получается нулевой просто финальная разность у меня, при этом алгоритм работает 
-    n = n+2;
-    vvod(X, Y, fi, N, dx, LEFT); 
-    vvod_basis(X, Y_basis, X_basis, n, dx_basis);
-    /*Y[0][0] = 12;
-    Y[1][0] = 13;
-    Y[2][0] = 14;
-    Y[3][0] = 16;
-    X_basis[0] = 5;
-    X_basis[1] = 6;
-    X_basis[2] = 9;
-    X_basis[3] = 11;*/
-    //строим матрицу
-    //printf("iter is 0\n");
-    divided_diff_table(X_basis,Y_basis,fi,n);
-    double result = algo(X_basis, Y_basis, fi, n, X_basis[2]);
-    double h = Y_basis[0][n-1]/fi[0][n-1];
-    printf("Result is: %.12lf h is %.12lf\n", result, h); // pfgjkybkb
-    double error = 0; 
-    int error_ind = 0;
-    for (int i=0; i<N+1; ++i){
-        if (error < abs(Y[i] - algo(X_basis, Y_basis, fi, n, X[i]))){
-            error = abs(Y[i] - algo(X_basis, Y_basis, fi, n, X[i]));
-            error_ind = i;
-        }
-    }
-    //printf("error is %lf\n", error); 
-    //printf("error_ind is %d\n", error_ind);
+        // Найдём h
+        double h;
+        h = f_d[n] / phi_d[n];
 
-    //while (abs(h - error) > 1e-8){
-        int v = -1; // если не подойдет тут то сначала найдем место в массиве элемента
-        for (int i =0; i < n; ++i){
-            if(X[error_ind] > X_basis[i])
-                v++; 
-        }
-    //printf("pos equals: %d\n", v);
-    //printf("X_v %lf\n", X_basis[v]);
-    //printf("X_v+1 %lf\n", X_basis[v+1]);
-   // printf("X_error is  %lf\n", X[error_ind] );
+        // Найдём h(sigma) - максимально уклонение на узлах базиса
+        double h_tmp, h_s = 0;
 
-    while (abs(abs(h) - error) > 1e-12){
-       // printf("abs - h = %lf\n", h);
-        if((v > -1) && (v < n -1)){
-           // printf("sign = %d\n", sign(Y[error_ind] - algo(X_basis, Y_basis, fi, n, X[error_ind])));
-            if(sign(Y[error_ind] - algo(X_basis, Y_basis, fi, n, X[error_ind])) == sign(Y_basis[v][0] - algo(X_basis, Y_basis, fi, n, X_basis[v]))){
-                 X_basis[v] = X[error_ind];    
-            }
-            else{ //
-                 X_basis[v+1] = X[error_ind];
+        for (int i = 0; i <= n + 1; ++i)
+        {
+
+            double p_ = P(x_basis[i],
+                          x_basis,
+                          y_basis[0],
+                          h,
+                          f_d,
+                          phi_d,
+                          n);
+
+            h_tmp = y_basis[i] - p_;
+
+            cout << "\t\th = " << h << "\n";
+
+            cout << "\ty_basis[i] = " << y_basis[i] << "\n";
+
+            cout << "\tP = " << p_ << "\n";
+
+            cout << "\th_tmp = " << h_tmp << "\n";
+
+            if (abs(h_tmp) > h_s)
+            {
+                h_s = abs(h_tmp);
             }
         }
-        else{
-            if (v == -1){
-                if (sign(Y[error_ind] - algo(X_basis, Y_basis, fi, n, X[error_ind])) == sign(Y_basis[0][0] - algo(X_basis, Y_basis, fi, n, X_basis[0])))
-                {
-                    X_basis[0] = X[error_ind]; 
-                }
-                else{
-                    for (int j= n-1; j > 0; --j)
-                {
-                    X_basis[j] = X_basis[j-1]; //по идее сначала надо 
-                }
-                    X_basis[0] = X[error_ind];     
-                }
-            }
-            else{
-                 if (sign(Y[error_ind] - algo(X_basis, Y_basis, fi, n, X[error_ind])) == sign(Y_basis[n-1][0] - algo(X_basis, Y_basis, fi, n, X_basis[n-1])))
-                 {
-                    X_basis[n-1] = X[error_ind];
-                 }
-                 else {
-                    for (int j=0; j< n - 1; ++j){
-                        X_basis[j] = X_basis[j+1]; 
-                    }
-                    X_basis[n-1] = X[error_ind];
-                 }
+
+        // Найдём phi(sigma) - максимально уклонение на всех узлах
+        double phi_tmp, cur_delta, phi_s = 0;
+        int cur_idx = 0;
+
+        for (int i = 0; i <= N; ++i)
+        {
+            double p;
+            p = P(x[i],
+                  x_basis,
+                  y_basis[0],
+                  h,
+                  f_d,
+                  phi_d,
+                  n);
+            phi_tmp = y[i] - p;
+            // cout << "P = " << p << "\n";
+            // cout << "phi_tmp = " << phi_tmp << "\n";
+
+            if (abs(phi_tmp) > phi_s)
+            {
+                phi_s = abs(phi_tmp);
+
+                cur_idx = i; // номер узла, на котором достигается максимум phi (т е на всех узлах)
+                cur_delta = phi_tmp;
             }
         }
-        for (int i =0 ; i < n; i++){
-            Y_basis[i][0] = testFunc(X_basis[i]);
+
+        cout << "\nh = " << h << "\n";
+        cout << "h_s = " << h_s << "\n";
+        cout << "phi_s = " << phi_s << "\n";
+        cout << "Разница abs(h_s - phi_s) = " << abs(h_s - phi_s) << "\n";
+
+        if (abs(h_s - phi_s) <= 1e-5)
+        {
+
+            cout << "\n~~~~~~~~Алгоритм завершён!~~~~~~~~\n";
+
+            cout << "\ncounter = " << counter << "\n";
+
+            cout << "\nИтоговые индексы базисных точек:\n";
+            matrix_print(basis_idx, 1, n + 2);
+
+            cout << "\nБазисные точки:\n";
+            matrix_print(x_basis, 1, n + 2);
+
+            cout << "\nЗначение функции в точках\n";
+            matrix_print(y_basis, 1, n + 2);
+
+            std::ofstream origin_f, basis_f;
+            origin_f.open("/Users/daniilkorolkov/Desktop/EVM/4/3/origins.txt");
+            basis_f.open("/Users/daniilkorolkov/Desktop/EVM/4/3/basis.txt");
+
+            int i;
+            for (i = 0; i <= N; i++)
+            {
+                origin_f << x[i] << " " << y[i] << "\n";
+            }
+
+            for (i = 0; i < n + 2; i++)
+            {
+                basis_f << x_basis[i] << " " << P(x_basis[i], x_basis, y_basis[0], h, f_d, phi_d, n) << "\n";
+            }
+
+            delete[] f_d;
+            delete[] phi_d;
+
+            delete[] x_basis;
+            delete[] y_basis;
+
+            delete[] x;
+            delete[] y;
+
+            break;
         }
-        printf("X[i]_basis                Y[i]_basis is\n");
-        printf("//////////////////////////////////////////////////////////////\n");
-    for (int i = 0; i < n; i++){
-        printf("%lf",X_basis[i]);
-        printf("                         %lf\n",Y_basis[i][0]);
-    } 
-        divided_diff_table(X_basis,Y_basis,fi,n); 
-        h = Y_basis[0][n-1]/fi[0][n-1]; 
-        printf("h = %lf\n", Y_basis[0][n-1]/fi[0][n-1]);
-        error = 0; 
-        error_ind = 0;
-        for (int i=0; i<N+1; ++i){
-            if (error < abs(Y[i] - algo(X_basis, Y_basis, fi, n, X[i]))){
-                error = abs(Y[i] - algo(X_basis, Y_basis, fi, n, X[i]));
-                error_ind = i;
+        else
+        {
+
+            cout << "\n-----Меняй!-----\n";
+
+            switch_x_basis(basis_idx, x, y, x_basis, y_basis, f_d, phi_d, cur_idx, cur_delta, h, n);
         }
     }
-    //printf("error is %lf\n", error); 
-    //printf("error_ind is %d\n", error_ind);
-    //while (abs(h - error) > 1e-8){
-         v = -1; // если не подойдет тут то сначала найдем место в массиве элемента
-        for (int i =0; i < n; ++i){
-            if(X[error_ind] > X_basis[i])
-                v++;
-        }
 
-        printf("         X[i]         Y[i] = F(X[i])       Abs(P(X[i])-Y[i])\n");
-	for (int k = 0; k < N; ++k) {
-		printf("%18.12lf   %18.12lf   %18.12lf\n", X[k], Y[k], Y[k] - algo(X_basis, Y_basis, fi, n, X[k]));
-	}
-    } 
-    //мы найдем тот оптимальный базис, на котором все строится. Далее
-
-    std::ofstream origin_f; 
-        origin_f.open("nodes.txt");
-        int i = 0;
-        for (int i = 0; i < N + 1; i++){
-            origin_f << X[i] << " " << algo(X_basis, Y_basis, fi, n, X[i]) << " " << Y[i]<< "\n";
-        } // ну вот тут показываем интерполяцию нужную нам 
-
-
-   // }
-     // пусть это верно как-бы, ну например надо добиться тоэжества 
-    //далее одгрузим алгоритм интерполяции сюда 
-    //double y_0 = testFunc(X_basis[0]); 
-   // проверка быстрая что все ок 
-    /*double error = 0; 
-    int error_ind = 0;
-    double sum = 0;
-    //printf("%lf", -0.000/1); //ну вот это как будто норм
-    for (int i = 0; i<N+2; i++){
-        double X_target = X[i]; 
-        for(int k = 1; k < n-1; k++)
-            sum += (Y_basis[0][k] - h*fi[0][k]) * multipl(X_target, X_basis, k);
-        if (error < abs(Y_basis[0][0] - h + sum - Y[i])){
-            error_ind = i;
-            error = abs(Y_basis[0][0] - h + sum - Y[i]);
-        }
-        sum = 0; //
-    }
-    printf("best error is %lf", error);*/ //ну мы доходим до конца как бы. Лучшая ошибка вот такая, так и напс
-    return 0; // ну вроде ок как-бы
-} 
+    return SUCCES;
+}

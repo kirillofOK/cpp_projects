@@ -54,11 +54,11 @@ void input_u(int func_num, double *u, int M, int N)
         for (int i = 0; i <= M; ++i)
         {
 
-            x_i = i * h_x;
+            x_i = (-h_x / 2) + i * h_x;
             for (int j = 0; j <= N; ++j)
             {
 
-                y_j = j * h_y;
+                y_j = (-h_y / 2) + j * h_y;
 
                 u[i * (M + 1) + j] = x_i * (1 - x_i) * y_j * (1 - y_j);
             }

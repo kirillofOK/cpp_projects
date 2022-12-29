@@ -59,7 +59,6 @@ int main()
                 C_true[i * (M + 1) + j] = 0;
             }
         }
-        
         C_true[1 * (M + 1) + 1] = 1;
 
         cout << norm(C_true, C, M, N) << '\n';
